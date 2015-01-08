@@ -1,21 +1,37 @@
 package de.holisticon.dropwizard.deltaspike.example;
 
 import com.google.common.io.Resources;
-import de.holisticon.dropwizard.deltaspike.DeltaspikeBundle;
+import de.holisticon.dropwizard.deltaspike.DeltaspikeManagedBundle;
 import io.dropwizard.Application;
 import io.dropwizard.Configuration;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 import java.io.File;
 
-
+@ApplicationScoped
 public class DeltaspikeExampleApplication extends Application<DeltaspikeExampleApplication.Config> {
 
-    private DummyHealthCheck dummyHealthCheck = new DummyHealthCheck();
+    @Dependent
+    public static class Foo {
 
-    private DummyResource dummyResource = new DummyResource();
+    }
+
+    @Inject
+    private Foo foo;
+
+
+    @Inject
+    private DummyHealthCheck dummyHealthCheck;
+
+
+    @Inject
+    private DummyResource dummyResource;
+
+
 
     @Override
     public void run(final Config config, final Environment environment) throws Exception {
@@ -25,7 +41,7 @@ public class DeltaspikeExampleApplication extends Application<DeltaspikeExampleA
 
     @Override
     public void initialize(Bootstrap<Config> bootstrap) {
-        bootstrap.addBundle(new DeltaspikeBundle());
+        bootstrap.addBundle(new DeltaspikeManagedBundle());
     }
 
     public static class Config extends Configuration {
