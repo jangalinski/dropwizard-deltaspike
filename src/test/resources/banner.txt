@@ -1,5 +1,5 @@
 #
 #
-#  Dropwizard on Deltaspike/Weld
+#  Dropwizard on Deltaspike/Weld - Example
 #
 #

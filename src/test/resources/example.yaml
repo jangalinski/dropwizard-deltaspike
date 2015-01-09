@@ -3,3 +3,6 @@ server:
   connector:
     type: http
     port: 3456
+
+
+exampleName: This is an example!

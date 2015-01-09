@@ -1,15 +1,20 @@
 package de.holisticon.dropwizard.deltaspike.example;
 
+import com.codahale.metrics.health.HealthCheck;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.io.Resources;
 import de.holisticon.dropwizard.deltaspike.DeltaspikeBundle;
 import io.dropwizard.Application;
 import io.dropwizard.Configuration;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
+import jersey.repackaged.com.google.common.base.Objects;
+import org.glassfish.hk2.utilities.binding.AbstractBinder;
 import org.slf4j.Logger;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.Dependent;
+import javax.enterprise.event.Event;
 import javax.inject.Inject;
 import java.io.File;
 
@@ -18,18 +23,12 @@ import static org.slf4j.LoggerFactory.getLogger;
 @ApplicationScoped
 public class DeltaspikeExampleApplication extends Application<DeltaspikeExampleApplication.Config> {
 
-    @Dependent
-    public static class Foo {
-
-    }
 
     @Inject
-    private Foo foo;
-
+    private FooLogger.Foo foo;
 
     @Inject
-    private DummyHealthCheck dummyHealthCheck;
-
+    private Event<FooLogger.Foo> fooEvent;
 
     @Inject
     private DummyResource dummyResource;
@@ -40,24 +39,46 @@ public class DeltaspikeExampleApplication extends Application<DeltaspikeExampleA
     @Override
     public void run(final Config config, final Environment environment) throws Exception {
         logger.error("------------------- application-run-1");
+        fooEvent.fire(foo);
 
-        environment.healthChecks().register("dummy", dummyHealthCheck);
+        environment.healthChecks().register("dummy", new HealthCheck() {
+            @Override
+            protected Result check() throws Exception {
+                return Result.healthy("dummy");
+            }
+        });
+
         environment.jersey().register(dummyResource);
 
-        logger.error("------------------- application-run-2               ----");
+
+        logger.error("------------------- application-run-2");
     }
 
     @Override
-    public void initialize(Bootstrap<Config> bootstrap) {
-        logger.error("------------------- application-init-1");
-        bootstrap.addBundle(new DeltaspikeBundle());
-        logger.error("------------------- application-init-2");
+    public void initialize(final Bootstrap<Config> bootstrap) {
+        // add DeltaspikeBundle here ... nothing else required.
+        bootstrap.addBundle(new DeltaspikeBundle(Config.class));
     }
 
+    /**
+     * Simple Configuration class for this example application.
+     */
     public static class Config extends Configuration {
-        // empty
+        @JsonProperty
+        public String exampleName;
+
+        @Override
+        public String toString() {
+            return Objects.toStringHelper(this).add("exampleName", exampleName).toString();
+        }
     }
 
+    /**
+     * Simplified main() to run this example from IDE/maven.
+     *
+     * @param _unused
+     * @throws Exception
+     */
     public static void main(String... _unused) throws Exception {
         new DeltaspikeExampleApplication().run("server", new File(Resources.getResource("example.yaml").toURI()).getAbsolutePath());
     }

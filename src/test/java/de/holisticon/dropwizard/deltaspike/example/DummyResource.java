@@ -2,34 +2,35 @@ package de.holisticon.dropwizard.deltaspike.example;
 
 import com.google.common.base.Supplier;
 
-import javax.enterprise.context.Dependent;
+import javax.annotation.ManagedBean;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import java.util.UUID;
 
-@Path("/hello-world")
+@Path(DummyResource.ROOT_PATH)
 @Produces(MediaType.APPLICATION_JSON)
 public class DummyResource {
 
-    @Named
-    public static class Foo implements Supplier<String> {
+    public static final String ROOT_PATH = "/dummy";
+
+    public static class Bar implements Supplier<String> {
 
         @Override
         public String get() {
-            return "foo";
+            return "bar";
         }
     }
 
-    private Foo foo = new Foo();
-
-
+    @Inject
+    private Bar bar;
 
     @GET
-    public String hellWorld() {
-        return "hello " + foo.get();
+    public String helloWorld() {
+        return "hello " + bar.get();
     }
 
 }

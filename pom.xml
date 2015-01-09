@@ -20,6 +20,7 @@
         <deltaspike.version>1.2.1</deltaspike.version>
         <weld.version>2.2.8.Final</weld.version>
         <cdi-api.version>1.2</cdi-api.version>
+        <jersey.version>2.13</jersey.version>
     </properties>
 
     <dependencies>
@@ -76,7 +77,7 @@
         <dependency>
             <groupId>org.glassfish.jersey.containers.glassfish</groupId>
             <artifactId>jersey-gf-cdi</artifactId>
-            <version>2.13</version>
+            <version>${jersey.version}</version>
         </dependency>
         <dependency>
             <groupId>javax.transaction</groupId>
@@ -90,7 +91,18 @@
             <version>${dropwizard.version}</version>
             <scope>test</scope>
         </dependency>
-
+        <dependency>
+            <groupId>org.glassfish.jersey.test-framework.providers</groupId>
+            <artifactId>jersey-test-framework-provider-inmemory</artifactId>
+            <version>${jersey.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.needle4j</groupId>
+            <artifactId>needle4j</artifactId>
+            <version>2.3</version>
+            <scope>test</scope>
+        </dependency>
 
     </dependencies>
 

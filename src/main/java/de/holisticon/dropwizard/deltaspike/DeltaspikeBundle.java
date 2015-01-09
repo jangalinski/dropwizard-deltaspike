@@ -1,7 +1,9 @@
 package de.holisticon.dropwizard.deltaspike;
 
+import static org.slf4j.LoggerFactory.getLogger;
+
+import com.google.common.base.Preconditions;
 import io.dropwizard.Application;
-import io.dropwizard.Bundle;
 import io.dropwizard.Configuration;
 import io.dropwizard.ConfiguredBundle;
 import io.dropwizard.lifecycle.Managed;
@@ -13,44 +15,60 @@ import org.apache.deltaspike.core.api.provider.BeanProvider;
 import org.slf4j.Logger;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.ConversationScoped;
 import javax.enterprise.context.RequestScoped;
 import javax.enterprise.context.SessionScoped;
-import javax.enterprise.inject.spi.CDI;
+import javax.enterprise.inject.spi.Bean;
 
-import static org.slf4j.LoggerFactory.getLogger;
-
+/**
+ * Dropwizard bundle that starts and initializes a deltaspike CDIContainer.
+ *
+ * @param <T> the type of configuration used by application.
+ */
 public class DeltaspikeBundle<T extends Configuration> implements ConfiguredBundle<T> {
 
     private final CdiContainer cdiContainer = CdiContainerLoader.getCdiContainer();
     private final Logger logger = getLogger(this.getClass());
 
+    private final Class<T> configurationClass;
+
+    private Application<T> application;
+
+    static Bean<? extends Configuration> configurationBean;
+
+    /**
+     * Create new bundle instance.
+     *
+     * @param configurationClass concrete type for T, needed to register generic beans with CDI.
+     */
+    public DeltaspikeBundle(final Class<T> configurationClass) {
+        this.configurationClass = Preconditions.checkNotNull(configurationClass);
+    }
 
     @Override
-    public void initialize(Bootstrap<?> bootstrap) {
-        logger.error("------------------- bundle-init-1");
-        cdiContainer.boot();
-
-        cdiContainer.getContextControl().startContext(RequestScoped.class);
-        cdiContainer.getContextControl().startContext(SessionScoped.class);
-        cdiContainer.getContextControl().startContext(ApplicationScoped.class);
-
-        BeanProvider.injectFields(bootstrap.getApplication());
-        logger.error("------------------- bundle-init-2");
+    public void initialize(final Bootstrap<?> bootstrap) {
+        application = (Application<T>) bootstrap.getApplication();
     }
 
     @Override
     public void run(T configuration, Environment environment) throws Exception {
+
         logger.error("------------------- bundle-run-1");
+
+        bootCdiContainer();
+
+        BeanProvider.injectFields(application);
+        logger.info("-------- injecting into application, so application.run() can use CDI instances.");
+
+        // shutdown CDI Container on server shutdown via Managed.
         environment.lifecycle().manage(new Managed() {
             @Override
             public void start() throws Exception {
-                logger.error("------------------- managed-start-1");
+                // empty
             }
 
             @Override
             public void stop() throws Exception {
-                logger.error("------------------- managed-stop-1");
-
                 try {
                     cdiContainer.getContextControl().stopContexts();
                     cdiContainer.shutdown();
@@ -59,10 +77,20 @@ public class DeltaspikeBundle<T extends Configuration> implements ConfiguredBund
                     // weld lifecycle already ended
                     logger.debug("weld has been already shut down", e);
                 }
-                logger.error("------------------- managed-stop-2");
             }
         });
         logger.error("------------------- bundle-run-2");
+    }
+
+    /**
+     * Boot Container and start contexts.
+     */
+    private void bootCdiContainer() {
+        cdiContainer.boot();
+        cdiContainer.getContextControl().startContext(RequestScoped.class);
+        cdiContainer.getContextControl().startContext(SessionScoped.class);
+        cdiContainer.getContextControl().startContext(ApplicationScoped.class);
+        cdiContainer.getContextControl().startContext(ConversationScoped.class);
     }
 
 
