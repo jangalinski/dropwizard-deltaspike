@@ -1,8 +1,10 @@
 package de.holisticon.dropwizard.deltaspike.example;
 
+import static io.dropwizard.testing.ResourceHelpers.resourceFilePath;
+import static org.slf4j.LoggerFactory.getLogger;
+
 import com.codahale.metrics.health.HealthCheck;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.google.common.io.Resources;
 import de.holisticon.dropwizard.deltaspike.DeltaspikeBundle;
 import io.dropwizard.Application;
 import io.dropwizard.Configuration;
@@ -14,9 +16,6 @@ import org.slf4j.Logger;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
-import java.io.File;
-
-import static org.slf4j.LoggerFactory.getLogger;
 
 @ApplicationScoped
 public class DeltaspikeExampleApplication extends Application<DeltaspikeExampleApplication.Config> {
@@ -37,13 +36,18 @@ public class DeltaspikeExampleApplication extends Application<DeltaspikeExampleA
         logger.error("------------------- application-run-1");
         fooEvent.fire(foo);
 
+
         environment.healthChecks().register("dummy", new HealthCheck() {
             @Override
             protected Result check() throws Exception {
                 return Result.healthy("dummy");
             }
         });
+
+
         environment.jersey().register(dummyResource);
+
+        environment.getApplicationContext().addServlet(MyServlet.class, "/foo");
 
         logger.error("------------------- application-run-2");
     }
@@ -51,7 +55,7 @@ public class DeltaspikeExampleApplication extends Application<DeltaspikeExampleA
     @Override
     public void initialize(final Bootstrap<Config> bootstrap) {
         // add DeltaspikeBundle here ... nothing else required.
-        bootstrap.addBundle(new DeltaspikeBundle(Config.class));
+        bootstrap.addBundle(new DeltaspikeBundle());
     }
 
     /**
@@ -74,6 +78,8 @@ public class DeltaspikeExampleApplication extends Application<DeltaspikeExampleA
      * @throws Exception
      */
     public static void main(String... _unused) throws Exception {
-        new DeltaspikeExampleApplication().run("server", new File(Resources.getResource("example.yaml").toURI()).getAbsolutePath());
+        new DeltaspikeExampleApplication().run("server", resourceFilePath("example.yaml"));
     }
+
+
 }
