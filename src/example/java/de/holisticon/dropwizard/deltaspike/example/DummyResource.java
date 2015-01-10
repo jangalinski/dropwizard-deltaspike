@@ -2,7 +2,6 @@ package de.holisticon.dropwizard.deltaspike.example;
 
 import com.google.common.base.Supplier;
 
-import javax.annotation.ManagedBean;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.ws.rs.GET;
@@ -17,16 +16,26 @@ public class DummyResource {
 
     public static final String ROOT_PATH = "/dummy";
 
+
     public static class Bar implements Supplier<String> {
+
+        @Inject
+        @Named("foo")
+        private String foo;
 
         @Override
         public String get() {
-            return "bar";
+            return foo;
         }
     }
 
-    @Inject
-    private Bar bar;
+    //@Inject
+    private Bar bar = new Bar() {
+        @Override
+        public String get() {
+            return "foo" + UUID.randomUUID();
+        }
+    };
 
     @GET
     public String helloWorld() {

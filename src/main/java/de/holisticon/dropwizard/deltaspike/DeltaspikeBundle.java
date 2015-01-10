@@ -27,7 +27,6 @@ import javax.enterprise.inject.spi.Bean;
  */
 public class DeltaspikeBundle<T extends Configuration> implements ConfiguredBundle<T> {
 
-    private final CdiContainer cdiContainer = CdiContainerLoader.getCdiContainer();
     private final Logger logger = getLogger(this.getClass());
 
     private final Class<T> configurationClass;
@@ -55,7 +54,7 @@ public class DeltaspikeBundle<T extends Configuration> implements ConfiguredBund
 
         logger.error("------------------- bundle-run-1");
 
-        bootCdiContainer();
+        final CdiContainer cdiContainer = bootCdiContainer();
 
         BeanProvider.injectFields(application);
         logger.info("-------- injecting into application, so application.run() can use CDI instances.");
@@ -85,12 +84,15 @@ public class DeltaspikeBundle<T extends Configuration> implements ConfiguredBund
     /**
      * Boot Container and start contexts.
      */
-    private void bootCdiContainer() {
+    public static CdiContainer bootCdiContainer() {
+        final CdiContainer cdiContainer = CdiContainerLoader.getCdiContainer();
         cdiContainer.boot();
         cdiContainer.getContextControl().startContext(RequestScoped.class);
         cdiContainer.getContextControl().startContext(SessionScoped.class);
         cdiContainer.getContextControl().startContext(ApplicationScoped.class);
         cdiContainer.getContextControl().startContext(ConversationScoped.class);
+
+        return cdiContainer;
     }
 
 

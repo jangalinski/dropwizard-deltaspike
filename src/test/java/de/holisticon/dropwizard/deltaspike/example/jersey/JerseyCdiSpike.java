@@ -1,4 +1,4 @@
-package de.holisticon.dropwizard.deltaspike.jersey;
+package de.holisticon.dropwizard.deltaspike.example.jersey;
 
 import de.holisticon.dropwizard.deltaspike.example.DummyResource;
 import org.glassfish.jersey.server.ResourceConfig;
@@ -32,7 +32,7 @@ public class JerseyCdiSpike extends JerseyTest {
 
     @Test
     public void test() {
-        assertThat(target(DummyResource.ROOT_PATH).request().get(String.class)).isEqualTo("hello bar");
+        assertThat(target(DummyResource.ROOT_PATH).request().get(String.class)).startsWith("hello foo");
     }
 
     @After

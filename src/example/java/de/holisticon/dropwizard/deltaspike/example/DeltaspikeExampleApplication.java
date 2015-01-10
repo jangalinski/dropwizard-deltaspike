@@ -9,11 +9,9 @@ import io.dropwizard.Configuration;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import jersey.repackaged.com.google.common.base.Objects;
-import org.glassfish.hk2.utilities.binding.AbstractBinder;
 import org.slf4j.Logger;
 
 import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.context.Dependent;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
 import java.io.File;
