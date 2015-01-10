@@ -21,7 +21,6 @@ import static org.slf4j.LoggerFactory.getLogger;
 @ApplicationScoped
 public class DeltaspikeExampleApplication extends Application<DeltaspikeExampleApplication.Config> {
 
-
     @Inject
     private FooLogger.Foo foo;
 
@@ -32,7 +31,6 @@ public class DeltaspikeExampleApplication extends Application<DeltaspikeExampleA
     private DummyResource dummyResource;
 
     private final Logger logger = getLogger(this.getClass());
-
 
     @Override
     public void run(final Config config, final Environment environment) throws Exception {
@@ -45,9 +43,7 @@ public class DeltaspikeExampleApplication extends Application<DeltaspikeExampleA
                 return Result.healthy("dummy");
             }
         });
-
         environment.jersey().register(dummyResource);
-
 
         logger.error("------------------- application-run-2");
     }

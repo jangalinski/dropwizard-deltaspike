@@ -17,7 +17,6 @@ public class BarInjectionTest {
     @Inject
     private DummyResource.Bar bar;
 
-
     @Test
     public void injects_bar_with_internal_foo() {
         BeanProvider.injectFields(this);

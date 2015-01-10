@@ -16,7 +16,6 @@ public class DummyResource {
 
     public static final String ROOT_PATH = "/dummy";
 
-
     public static class Bar implements Supplier<String> {
 
         @Inject
@@ -29,13 +28,8 @@ public class DummyResource {
         }
     }
 
-    //@Inject
-    private Bar bar = new Bar() {
-        @Override
-        public String get() {
-            return "foo" + UUID.randomUUID();
-        }
-    };
+    @Inject
+    private Bar bar;
 
     @GET
     public String helloWorld() {
