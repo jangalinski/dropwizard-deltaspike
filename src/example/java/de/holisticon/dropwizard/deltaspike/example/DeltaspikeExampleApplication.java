@@ -55,7 +55,7 @@ public class DeltaspikeExampleApplication extends Application<DeltaspikeExampleA
     @Override
     public void initialize(final Bootstrap<Config> bootstrap) {
         // add DeltaspikeBundle here ... nothing else required.
-        bootstrap.addBundle(new DeltaspikeBundle());
+        bootstrap.addBundle(DeltaspikeBundle.builder().enableAutoConfig().build());
     }
 
     /**

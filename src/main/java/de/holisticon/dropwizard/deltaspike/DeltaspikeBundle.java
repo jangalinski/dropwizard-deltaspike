@@ -15,25 +15,49 @@ import org.apache.deltaspike.core.api.provider.BeanProvider;
 import org.slf4j.Logger;
 
 import javax.enterprise.inject.spi.Bean;
+import javax.inject.Inject;
 
 /**
  * Dropwizard bundle that starts and initializes a deltaspike CDIContainer.
  *
  * @param <T> the type of configuration used by application.
  */
+@SuppressWarnings("CdiManagedBeanInconsistencyInspection")
 public class DeltaspikeBundle<T extends Configuration> implements ConfiguredBundle<T> {
 
+
+    public static class Builder<T extends Configuration>  {
+
+        private boolean autoConfig;
+
+        public Builder enableAutoConfig() {
+            this.autoConfig = true;
+            return this;
+        }
+
+        public DeltaspikeBundle<T> build() {
+            return new DeltaspikeBundle<T>(autoConfig);
+        }
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
     private final Logger logger = getLogger(this.getClass());
+    private final boolean autoConfig;
 
     private Application<T> application;
 
     static Bean<? extends Configuration> configurationBean;
 
-    /**
-     * Create new bundle instance.
-     */
-    public DeltaspikeBundle() {
+    @Inject
+    private DropwizardCdiExtension dropwizardCdiExtension;
 
+
+    private DeltaspikeBundle(boolean autoConfig) {
+
+        this.autoConfig = autoConfig;
     }
 
     @Override
@@ -42,10 +66,16 @@ public class DeltaspikeBundle<T extends Configuration> implements ConfiguredBund
     }
 
     @Override
-    public void run(T configuration, Environment environment) throws Exception {
+    public void run(final T configuration, final Environment environment) throws Exception {
         logger.error("------------------- bundle-run-1");
 
         final CdiContainer cdiContainer = bootCdiContainer();
+
+        BeanProvider.injectFields(this);
+
+        logger.error("------------------- {}", dropwizardCdiExtension);
+        logger.error("------------------- {}", dropwizardCdiExtension.getNames());
+
 
         BeanProvider.injectFields(application);
         logger.info("-------- injecting into application, so application.run() can use CDI instances.");
@@ -70,6 +100,7 @@ public class DeltaspikeBundle<T extends Configuration> implements ConfiguredBund
             }
         });
 
+        environment.servlets();
         environment.servlets().addServletListeners(new CdiServletRequestListener());
 
         logger.error("------------------- bundle-run-2");

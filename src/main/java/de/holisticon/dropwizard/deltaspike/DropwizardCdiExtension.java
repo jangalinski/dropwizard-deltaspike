@@ -1,7 +1,9 @@
 package de.holisticon.dropwizard.deltaspike;
 
+import com.google.common.collect.Sets;
 import org.slf4j.Logger;
 
+import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.spi.AfterBeanDiscovery;
 import javax.enterprise.inject.spi.BeforeBeanDiscovery;
@@ -10,9 +12,18 @@ import javax.enterprise.inject.spi.ProcessAnnotatedType;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
+import java.util.Set;
+
 class DropwizardCdiExtension implements Extension {
 
     private final Logger logger = getLogger(this.getClass());
+
+    private final Set<String> names = Sets.newHashSet();
+
+
+    public DropwizardCdiExtension() {
+        logger.error("......................................... created {}",this);
+    }
 
     void beforeBeanDiscovery(@Observes BeforeBeanDiscovery bbd) {
         logger.error("============================> beginning the scanning process");
@@ -20,11 +31,17 @@ class DropwizardCdiExtension implements Extension {
 
 
     <T> void processAnnotatedType(@Observes ProcessAnnotatedType<T> pat) {
-        logger.error("============================> scanning type: " + pat.getAnnotatedType().getJavaClass().getName());
+        final String name = pat.getAnnotatedType().getJavaClass().getName();
+        logger.error("============================> scanning type: {}", name);
+        names.add(name);
     }
 
     void afterBeanDiscovery(@Observes AfterBeanDiscovery abd) {
         logger.error("============================> finished the scanning process");
 
+    }
+
+    public Set<String> getNames() {
+        return names;
     }
 }
